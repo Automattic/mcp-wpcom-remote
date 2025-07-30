@@ -1,7 +1,7 @@
 {
   "name": "@automattic/mcp-wpcom-remote",
   "version": "0.2.1",
-  "description": "MCP WordPress Remote proxy server",
+  "description": "MCP WordPress.com remote proxy server",
   "engines": {
     "node": ">=22.0.0"
   },
@@ -14,7 +14,7 @@
   "author": "Automattic Inc.",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/Automattic/mcp-wpcom-remote.git"
+    "url": "git+https://github.a8c.com/Automattic/mcp-wpcom-remote"
   },
   "type": "module",
   "files": [

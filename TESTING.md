@@ -1,6 +1,8 @@
 1) Clone this repository https://github.a8c.com/Automattic/mcp-wpcom-remote
 2) Run `npm i && npm run build`
 3) configure Claude Desktop
+
+```
 {
   "mcpServers": {
     "wordpress.com": {
@@ -15,3 +17,4 @@
     }
   }
 }
+```

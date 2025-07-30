@@ -5,12 +5,13 @@ import { createServer } from 'http';
 import { WordPressRequestParams, WordPressResponse } from './types.js';
 import * as fs from 'node:fs';
 import * as path from 'node:path';
+import { CONFIG } from './config.js';
 
 // Version of the package
 export const MCP_WORDPRESS_REMOTE_VERSION = '0.1.14';
 
 // Logging configuration
-const LOG_FILE = process.env.LOG_FILE || null;
+const LOG_FILE = CONFIG.LOG_FILE;
 
 // Ensure log diectory exists if logging to file is enabled
 if (LOG_FILE) {

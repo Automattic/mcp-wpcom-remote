@@ -24,9 +24,22 @@ OAuth provides secure authentication for WordPress.com public API access with **
   "mcpServers": {
     "wordpress.com": {
       "command": "npx",
+      "args": ["@automattic/mcp-wpcom-remote"]
+    }
+  }
+}
+```
+
+To override the default API URL, you can optionally set the `WP_API_URL` environment variable:
+
+```json
+{
+  "mcpServers": {
+    "wordpress.com": {
+      "command": "npx",
       "args": ["@automattic/mcp-wpcom-remote"],
       "env": {
-        "WP_API_URL": "https://public-api.wordpress.com/wpcom/v2/mcp/sites"
+        "WP_API_URL": "https://your-custom-api-endpoint.com/wpcom/v2/mcp/v1"
       }
     }
   }
@@ -35,7 +48,7 @@ OAuth provides secure authentication for WordPress.com public API access with **
 
 #### Environment Variables
 
-- `WP_API_URL`: WordPress.com public API endpoint (**required**)
+- `WP_API_URL`: WordPress.com public API endpoint (optional, defaults to `https://public-api.wordpress.com/wpcom/v2/mcp/v1`)
 - `OAUTH_ENABLED`: OAuth is enabled by default. Set to "false" to disable OAuth authentication
 - `OAUTH_CALLBACK_PORT`: Port for OAuth callback server (default: 3000)
 - `OAUTH_HOST`: Hostname for OAuth callback (default: 127.0.0.1)

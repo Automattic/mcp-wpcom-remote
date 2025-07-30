@@ -9,6 +9,7 @@ import { AuthCoordinator, WPComTokens, OAuthError } from './oauth-types.js';
 import { getAuthDirectory, getValidTokens } from './wpcom-auth-config.js';
 import { WPComOAuthClientProvider } from './wpcom-oauth-client-provider.js';
 import { log } from './utils.js';
+import { CONFIG } from './config.js';
 
 /**
  * Lockfile management for coordinating between multiple instances
@@ -90,7 +91,7 @@ class LockfileManager {
   /**
    * Wait for lock to be released
    */
-  async waitForRelease(timeout: number = 300000): Promise<void> {
+  async waitForRelease(timeout: number = CONFIG.LOCK_TIMEOUT): Promise<void> {
     const startTime = Date.now();
 
     return new Promise((resolve, reject) => {
@@ -232,16 +233,13 @@ export class WPComAuthCoordinator implements AuthCoordinator {
       log('Performing OAuth authentication as lock owner');
 
       if (!this.oauthProvider) {
-        // We need server URL for the OAuth provider, get it from environment
-        const serverUrl = process.env.WP_API_URL;
-        if (!serverUrl) {
-          throw new OAuthError('WP_API_URL not configured');
-        }
+        // We need server URL for the OAuth provider, use environment variable or default
+        const serverUrl = CONFIG.WP_API_URL;
 
         this.oauthProvider = new WPComOAuthClientProvider({
           serverUrl,
           callbackPort: this.callbackPort,
-          host: '127.0.0.1',
+          host: CONFIG.OAUTH_HOST,
         });
       }
 

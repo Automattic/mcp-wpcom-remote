@@ -4,6 +4,7 @@ import fs from 'fs/promises';
 import fsSync from 'fs';
 import crypto from 'crypto';
 import { log } from './utils.js';
+import { CONFIG } from './config.js';
 
 // Hardcoded version for directory naming
 const VERSION = '0.2.1';
@@ -106,7 +107,7 @@ export async function deleteLockfile(serverUrlHash: string): Promise<void> {
  * Gets the configuration directory path
  */
 export function getConfigDir(): string {
-  const baseConfigDir = process.env.WPCOM_MCP_CONFIG_DIR || path.join(os.homedir(), '.mcp-auth');
+  const baseConfigDir = CONFIG.WPCOM_MCP_CONFIG_DIR;
   // Add a version subdirectory so we don't need to worry about backwards/forwards compatibility
   return path.join(baseConfigDir, `wpcom-remote-${VERSION}`);
 }

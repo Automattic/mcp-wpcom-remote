@@ -20,16 +20,17 @@ import {
 } from './wpcom-auth-config.js';
 import { setupWPComOAuthCallbackServer } from './oauth-callback-server.js';
 import { log } from './utils.js';
+import { CONFIG } from './config.js';
 
 /**
  * Default WordPress.com OAuth configuration
  */
 const DEFAULT_WPCOM_CONFIG = {
   authorizeEndpoint: 'https://public-api.wordpress.com/oauth2/authorize',
-  clientId: process.env.WPCOM_CLIENT_ID || '121755', // Default WordPress.com MCP client ID
+  clientId: CONFIG.WPCOM_CLIENT_ID,
   scopes: ['global'],
-  callbackPort: 3000,
-  host: '127.0.0.1',
+  callbackPort: CONFIG.OAUTH_CALLBACK_PORT,
+  host: CONFIG.OAUTH_HOST,
 };
 
 export class WPComOAuthClientProvider implements OAuthClientProvider {
@@ -114,7 +115,7 @@ export class WPComOAuthClientProvider implements OAuthClientProvider {
       port: this.options.callbackPort,
       host: this.options.host,
       serverUrlHash: this.serverUrlHash,
-      timeout: 30000, // 30 seconds timeout
+      timeout: CONFIG.OAUTH_TIMEOUT,
     };
 
     const callbackServer = setupWPComOAuthCallbackServer(callbackServerOptions, this.events);
@@ -176,7 +177,7 @@ export class WPComOAuthClientProvider implements OAuthClientProvider {
       const timeout = setTimeout(() => {
         cleanup();
         reject(new OAuthError('Authorization timeout', 'TIMEOUT'));
-      }, 300000); // 5 minutes timeout
+      }, CONFIG.LOCK_TIMEOUT);
 
       const cleanup = () => {
         this.events.removeAllListeners('oauth-success');

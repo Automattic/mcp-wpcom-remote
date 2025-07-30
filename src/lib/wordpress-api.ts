@@ -12,6 +12,7 @@ import {
 } from './persistent-auth-config.js';
 import { PersistentWPComOAuthClientProvider } from './persistent-oauth-client-provider.js';
 import { log } from './utils.js';
+import { CONFIG } from './config.js';
 
 /**
  * WordPress API request function with OAuth support for general WordPress.com API
@@ -25,15 +26,10 @@ let oauthProvider: PersistentWPComOAuthClientProvider | null = null;
 let globalEvents: EventEmitter | null = null;
 
 function validateEnvironment() {
-  // Check for required WP_API_URL
-  if (!process.env.WP_API_URL) {
-    throw new Error('Missing required environment variable: WP_API_URL');
-  }
-
   // Check if we have any form of authentication configured
-  const hasJWT = !!process.env.JWT_TOKEN;
-  const hasBasicAuth = !!(process.env.WP_API_USERNAME && process.env.WP_API_PASSWORD);
-  const oauthEnabled = process.env.OAUTH_ENABLED !== 'false';
+  const hasJWT = !!CONFIG.JWT_TOKEN;
+  const hasBasicAuth = !!(CONFIG.WP_API_USERNAME && CONFIG.WP_API_PASSWORD);
+  const oauthEnabled = CONFIG.OAUTH_ENABLED;
 
   // Log authentication method being used
   if (hasJWT) {
@@ -62,7 +58,7 @@ function validateEnvironment() {
 async function getOAuthTokens(): Promise<WPComTokens | null> {
   try {
     // Check if OAuth is enabled (enabled by default, disabled only if explicitly set to false)
-    const oauthEnabled = process.env.OAUTH_ENABLED !== 'false';
+    const oauthEnabled = CONFIG.OAUTH_ENABLED;
     if (!oauthEnabled) {
       log('OAuth: Disabled via OAUTH_ENABLED=false');
       return null;
@@ -70,7 +66,7 @@ async function getOAuthTokens(): Promise<WPComTokens | null> {
 
     log('OAuth: Attempting to get tokens for general WordPress.com API...');
 
-    const serverUrl = process.env.WP_API_URL || 'https://public-api.wordpress.com';
+    const serverUrl = CONFIG.WP_API_URL;
     const serverUrlHash = generateServerUrlHash(serverUrl);
 
     // Try to get existing valid tokens first
@@ -84,8 +80,8 @@ async function getOAuthTokens(): Promise<WPComTokens | null> {
 
     // Initialize OAuth provider if needed
     if (!oauthProvider) {
-      const callbackPort = parseInt(process.env.OAUTH_CALLBACK_PORT || '3000');
-      const host = process.env.OAUTH_HOST || '127.0.0.1';
+      const callbackPort = CONFIG.OAUTH_CALLBACK_PORT;
+      const host = CONFIG.OAUTH_HOST;
 
       log(`OAuth: Setting up provider for general API access with callback port ${callbackPort}`);
 
@@ -94,7 +90,7 @@ async function getOAuthTokens(): Promise<WPComTokens | null> {
           serverUrl,
           callbackPort,
           host,
-          clientId: process.env.WPCOM_CLIENT_ID || '121755',
+          clientId: CONFIG.WPCOM_CLIENT_ID,
         });
         log('OAuth: Provider initialized successfully');
       } catch (providerError) {
@@ -141,7 +137,7 @@ export async function wpRequest(
   validateEnvironment();
 
   const method = 'POST';
-  const baseUrl = removeTrailingSlash(process.env.WP_API_URL!);
+  const baseUrl = removeTrailingSlash(CONFIG.WP_API_URL);
 
   // Log the request parameters for debugging
   log(`Request method: ${params.method || 'init'}`);
@@ -156,11 +152,11 @@ export async function wpRequest(
     authHeader = `Bearer ${oauthTokens.access_token}`;
     log(`Using OAuth token authentication for general WordPress.com API`);
     log(`Token length: ${oauthTokens.access_token.length}`);
-  } else if (process.env.JWT_TOKEN) {
+  } else if (CONFIG.JWT_TOKEN) {
     // Use JWT token for authentication
-    authHeader = `Bearer ${process.env.JWT_TOKEN}`;
+    authHeader = `Bearer ${CONFIG.JWT_TOKEN}`;
     log(`Using JWT token authentication`);
-    log(`Token length: ${process.env.JWT_TOKEN.length}`);
+    log(`Token length: ${CONFIG.JWT_TOKEN.length}`);
   } else {
     // Determine which credentials to use based on the method and args
     let username: string;
@@ -173,8 +169,8 @@ export async function wpRequest(
       params.args.tool.startsWith('wc_reports_')
     ) {
       // Use WooCommerce credentials for WooCommerce report tools
-      username = process.env.WOO_CUSTOMER_KEY!;
-      password = process.env.WOO_CUSTOMER_SECRET!;
+      username = CONFIG.WOO_CUSTOMER_KEY!;
+      password = CONFIG.WOO_CUSTOMER_SECRET!;
 
       // Log which credentials are being used
       log(`Using WooCommerce credentials for tool: ${params.args.tool}`);
@@ -187,8 +183,8 @@ export async function wpRequest(
       }
     } else {
       // Use standard WordPress credentials for other methods
-      username = process.env.WP_API_USERNAME!;
-      password = process.env.WP_API_PASSWORD!;
+      username = CONFIG.WP_API_USERNAME!;
+      password = CONFIG.WP_API_PASSWORD!;
 
       // Log which credentials are being used
       log(`Using WordPress credentials for method: ${params.method || 'init'}`);
@@ -204,7 +200,7 @@ export async function wpRequest(
     log(`Auth header length: ${auth.length}`);
   }
 
-  log(`Environment: ${process.env.NODE_ENV || 'development'}`);
+  log(`Environment: ${CONFIG.NODE_ENV}`);
   log(`API URL: ${baseUrl}`);
 
   // Build URL with query params for GET requests

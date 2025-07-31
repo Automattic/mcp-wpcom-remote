@@ -1,36 +1,85 @@
-# MCP WordPress Remote
+# MCP WordPress.com Remote
 
-A Model Context Protocol (MCP) server that provides secure access to WordPress.com via remote API connections. This server uses persistent OAuth token storage for maximum convenience and seamless long-term usage.
+🔌 **A Model Context Protocol (MCP) server for seamless WordPress.com integration**
 
-## Features
+Connect AI assistants like Claude Desktop to your WordPress.com sites with secure OAuth authentication and persistent token storage.
 
-- **Persistent OAuth Authentication**: Secure OAuth 2.0 authentication with permanent token storage
-- **Secure Token Storage**: OAuth tokens stored in `~/.mcp-auth/` with proper file permissions
-- **Version Isolation**: Each version gets its own storage directory for compatibility
-- **Multi-instance Coordination**: Lockfiles prevent conflicts between multiple instances
-- **Automatic Token Management**: Handles token validation and cleanup automatically
-- **WordPress.com Integration**: Optimized for WordPress.com public API access
+## ✨ Features
 
-## Authentication
+- **Secure OAuth 2.0 Authentication** - One-click setup with persistent token storage
+- **Version Isolation** - Each version stores tokens separately for compatibility
+- **Multi-instance Coordination** - Lockfiles prevent authentication conflicts
+- **Automatic Token Management** - Handles validation, refresh, and cleanup
+- **Complete MCP Support** - Tools, resources, prompts, and more
 
-### Persistent OAuth 2.0
+## 🚀 Quick Start
 
-OAuth provides secure authentication for WordPress.com public API access with **permanent token storage**.
+### Installation
 
-#### Configuration
+```bash
+npm install @automattic/mcp-wpcom-remote
+```
+
+### Configuration
+
+Add to your MCP client configuration (e.g., Claude Desktop's `claude_desktop_config.json`):
 
 ```json
 {
   "mcpServers": {
     "wordpress.com": {
       "command": "npx",
-      "args": ["@automattic/mcp-wpcom-remote"]
+      "args": [
+        "-y",
+        "@automattic/mcp-wpcom-remote"
+      ]
     }
   }
 }
 ```
 
-To override the default API URL, you can optionally set the `WP_API_URL` environment variable:
+### First Run
+
+1. **Start your MCP client** (Claude Desktop, etc.)
+2. **Browser opens automatically** for WordPress.com authorization
+3. **Authorize the application** - tokens are stored permanently
+4. **Start using WordPress.com features** in your AI assistant
+
+That's it! No re-authentication needed until tokens expire.
+
+## ⚙️ Advanced Configuration
+
+### Custom API Endpoint
+
+```json
+{
+  "mcpServers": {
+    "wordpress.com": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@automattic/mcp-wpcom-remote"
+      ],
+      "env": {
+        "WP_API_URL": "https://your-custom-endpoint.com/wpcom/v2/mcp/v1"
+      }
+    }
+  }
+}
+```
+
+### Custom OAuth Application
+
+**⚠️ Required when changing `OAUTH_CALLBACK_PORT`**
+
+If you need to use a different OAuth callback port (other than the default 3000), you must create your own OAuth application:
+
+1. **Create an OAuth App** at the [WordPress.com Application Manager](https://developer.wordpress.com/apps/)
+2. **Set the Redirect URL** to: `http://127.0.0.1:YOUR_PORT/oauth/callback`
+   - Replace `YOUR_PORT` with your desired port number
+   - Example: `http://127.0.0.1:8080/oauth/callback`
+3. **Note your Client ID** from the application details
+4. **Configure the MCP server**:
 
 ```json
 {
@@ -39,121 +88,189 @@ To override the default API URL, you can optionally set the `WP_API_URL` environ
       "command": "npx",
       "args": ["@automattic/mcp-wpcom-remote"],
       "env": {
-        "WP_API_URL": "https://your-custom-api-endpoint.com/wpcom/v2/mcp/v1"
+        "OAUTH_CALLBACK_PORT": "8080",
+        "WPCOM_CLIENT_ID": "your_client_id_here"
       }
     }
   }
 }
 ```
 
-#### Environment Variables
+For more details on OAuth configuration, see the [WordPress.com OAuth2 documentation](https://developer.wordpress.com/docs/oauth2/).
 
-- `WP_API_URL`: WordPress.com public API endpoint (optional, defaults to `https://public-api.wordpress.com/wpcom/v2/mcp/v1`)
-- `OAUTH_ENABLED`: OAuth is enabled by default. Set to "false" to disable OAuth authentication
-- `OAUTH_CALLBACK_PORT`: Port for OAuth callback server (default: 3000)
-- `OAUTH_HOST`: Hostname for OAuth callback (default: 127.0.0.1)
-- `WPCOM_CLIENT_ID`: WordPress.com OAuth client ID (optional, uses default if not set)
-- `WPCOM_MCP_CONFIG_DIR`: Override default config directory `~/.mcp-auth`
+### Environment Variables
 
-#### First-time Setup
+| Variable | Description | Default |
+|----------|-------------|---------|
+| `WP_API_URL` | WordPress.com API endpoint | `https://public-api.wordpress.com/wpcom/v2/mcp/v1` |
+| `OAUTH_ENABLED` | Enable OAuth authentication | `true` |
+| `OAUTH_CALLBACK_PORT` | OAuth callback port | `3000` |
+| `OAUTH_HOST` | OAuth callback hostname | `127.0.0.1` |
+| `WPCOM_CLIENT_ID` | Custom OAuth client ID | _(uses default)_ |
+| `WPCOM_MCP_CONFIG_DIR` | Config directory override | `~/.mcp-auth` |
 
-1. When you first start the server, it will automatically open your browser
-2. Authorize the application on WordPress.com
-3. The tokens will be stored permanently in `~/.mcp-auth/wpcom-remote-{version}/`
-4. All subsequent starts will use the stored tokens automatically
-5. **No re-authentication needed** until tokens expire or are manually cleared
+### Disable OAuth
 
-## Installation
-
-```bash
-npm install @automattic/mcp-wpcom-remote
+```json
+{
+  "mcpServers": {
+    "wordpress.com": {
+      "command": "npx",
+      "args": ["@automattic/mcp-wpcom-remote"],
+      "env": {
+        "OAUTH_ENABLED": "false"
+      }
+    }
+  }
+}
 ```
 
-## Usage
+## 🛠️ Development Mode
 
-1. Configure your MCP client with one of the authentication methods above
-2. Start your MCP client (Claude Desktop, etc.)
-3. The server will automatically handle authentication based on your configuration
-4. For OAuth: Follow the browser prompt for first-time authorization
+For development and testing, you can use the local repository instead of the published npm package:
 
-## Token Management
+### Setup
 
-### Persistent Token Storage
+1. **Clone the repository:**
+   ```bash
+   git clone https://github.com/Automattic/mcp-wpcom-remote.git
+   cd mcp-wpcom-remote
+   ```
 
-OAuth tokens are stored permanently in `~/.mcp-auth/wpcom-remote-{version}/` with:
+2. **Install dependencies:**
+   ```bash
+   npm install
+   ```
 
-- **Secure file permissions** (600)
-- **Version isolation** (each version gets its own directory)
-- **Server-specific files** (hashed by server URL)
-- **Process coordination** (lockfiles prevent conflicts)
+3. **Build the project:**
+   ```bash
+   npm run build
+   ```
 
-### Storage Structure
+### Configuration
 
+Configure your MCP client to use the local version:
+
+```json
+{
+  "mcpServers": {
+    "wordpress.com": {
+      "command": "node",
+      "args": [
+        "/path/to/your/mcp-wpcom-remote/dist/proxy.js"
+      ]
+    }
+  }
+}
+```
+
+**Example with full paths:**
+
+**💡 Tip:** If you use nvm, nodenv, or other Node.js version managers, your MCP client might not find the correct Node.js binary. In this case, use the full path to your Node.js installation:
+
+```bash
+# Find your Node.js path
+which node
+# Example output: /Users/yourname/.nvm/versions/node/v22.14.0/bin/node
+```
+```json
+{
+  "mcpServers": {
+    "wordpress.com": {
+      "command": "/usr/local/bin/node",
+      "args": [
+        "/Users/yourname/projects/mcp-wpcom-remote/dist/proxy.js"
+      ]
+    }
+  }
+}
+```
+
+### Development Workflow
+
+- **Watch mode:** `npm run build:watch` - Automatically rebuilds on file changes
+- **Testing:** `npm test` - Run the test suite
+
+**Note:** Make sure to rebuild (`npm run build`) after making changes to see them reflected in your MCP client.
+
+## 🔧 Token Management
+
+### Storage Location
+
+Tokens are automatically stored in:
 ```
 ~/.mcp-auth/wpcom-remote-{version}/
-├── {server_hash}_tokens.json         # OAuth access tokens
-├── {server_hash}_client_info.json    # OAuth client registration
-├── {server_hash}_code_verifier.txt   # PKCE verification codes
-└── {server_hash}_lock.json           # Process coordination
 ```
 
-### Automatic Management
-
-The server automatically:
-
-- Validates tokens before use
-- Loads tokens from persistent storage on startup
-- Cleans up expired tokens periodically
-- Coordinates between multiple instances using lockfiles
-
-### Manual Token Management
+### Manual Management
 
 ```bash
-# Check stored tokens
+# View stored tokens
 ls -la ~/.mcp-auth/wpcom-remote-*/
 
 # Clear all tokens (forces re-authentication)
 rm -rf ~/.mcp-auth/wpcom-remote-*/
 
-# Clear tokens for specific version only
+# Clear tokens for specific version
 rm -rf ~/.mcp-auth/wpcom-remote-0.2.1/
-
-# Clear tokens for specific server
-rm ~/.mcp-auth/wpcom-remote-*/[hash]_*
 ```
 
-## Troubleshooting
+## 🛡️ Security Features
+
+- **Secure file permissions** (600) on all token files
+- **PKCE verification** for OAuth flows
+- **State parameters** to prevent CSRF attacks
+- **Automatic token validation** before each request
+- **Expired token cleanup** during startup
+
+## 🐛 Troubleshooting
 
 ### OAuth Issues
 
-1. **Browser doesn't open**: Check if the callback port is available
-2. **Authorization fails**: Verify your WordPress.com permissions
-3. **Tokens expire quickly**: This is normal for security; re-authentication is automatic
+**Browser doesn't open:**
+- Check if port 3000 is available
+- If you need a different port, see [Custom OAuth Application](#custom-oauth-application) section
+
+**Authorization fails:**
+- Verify WordPress.com account permissions
+- Check if port 3000 is available
+- Try clearing tokens and re-authenticating
+
+### Multi-instance Messages
+
+If you see "waiting for other instance" messages, this is normal - the server coordinates OAuth between multiple instances using lockfiles.
 
 ### Port Conflicts
 
-If the default OAuth callback port (3000) is in use:
+If port 3000 is already in use, you'll need to:
+
+1. **Create a custom OAuth application** (see [Custom OAuth Application](#custom-oauth-application) section above)
+2. **Configure both the port and client ID**:
 
 ```json
-"OAUTH_CALLBACK_PORT": "3001"
+{
+  "env": {
+    "OAUTH_CALLBACK_PORT": "8080",
+    "WPCOM_CLIENT_ID": "your_client_id_here"
+  }
+}
 ```
 
-### Multi-instance Coordination
+**Note:** Simply changing the port without creating a custom OAuth app will cause authentication failures.
 
-The server uses lockfiles to coordinate OAuth authentication between multiple instances. If you see "waiting for other instance" messages, this is normal behavior.
+## 📋 Requirements
 
-## Security
+- **Node.js 22+** (required for fetch API support)
+- **WordPress.com account** (for OAuth authentication)
 
-- OAuth tokens are stored with secure file permissions (600)
-- State parameters are used to prevent CSRF attacks
-- Tokens are validated before each use
-- Expired tokens are automatically cleaned up
-
-## Requirements
-
-- Node.js 22+
-- WordPress.com site (for OAuth) or WordPress site with appropriate authentication plugins
-
-## License
+## 📝 License
 
 GPL v2 or later
+
+## 🤝 Contributing
+
+Contributions welcome! This project is maintained by Automattic Inc.
+
+---
+
+**Need help?** Check the [troubleshooting section](#-troubleshooting) or open an issue.

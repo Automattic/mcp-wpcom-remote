@@ -1,10 +1,10 @@
 # MCP WordPress.com Remote
 
-🔌 **A Model Context Protocol (MCP) server for seamless WordPress.com integration**
+**A Model Context Protocol (MCP) server for seamless WordPress.com integration**
 
 Connect AI assistants like Claude Desktop to your WordPress.com sites with secure OAuth authentication and persistent token storage.
 
-## ✨ Features
+## Features
 
 - **Secure OAuth 2.0 Authentication** - One-click setup with persistent token storage
 - **Version Isolation** - Each version stores tokens separately for compatibility
@@ -12,7 +12,7 @@ Connect AI assistants like Claude Desktop to your WordPress.com sites with secur
 - **Automatic Token Management** - Handles validation, refresh, and cleanup
 - **Complete MCP Support** - Tools, resources, prompts, and more
 
-## 🚀 Quick Start
+## Quick Start
 
 ### Installation
 
@@ -47,7 +47,7 @@ Add to your MCP client configuration (e.g., Claude Desktop's `claude_desktop_con
 
 That's it! No re-authentication needed until tokens expire.
 
-## ⚙️ Advanced Configuration
+## Advanced Configuration
 
 ### Custom API Endpoint
 
@@ -70,7 +70,7 @@ That's it! No re-authentication needed until tokens expire.
 
 ### Custom OAuth Application
 
-**⚠️ Required when changing `OAUTH_CALLBACK_PORT`**
+**Required when changing `OAUTH_CALLBACK_PORT`**
 
 If you need to use a different OAuth callback port (other than the default 3000), you must create your own OAuth application:
 
@@ -125,7 +125,7 @@ For more details on OAuth configuration, see the [WordPress.com OAuth2 documenta
 }
 ```
 
-## 🛠️ Development Mode
+## Development Mode
 
 For development and testing, you can use the local repository instead of the published npm package:
 
@@ -166,7 +166,7 @@ Configure your MCP client to use the local version:
 
 **Example with full paths:**
 
-**💡 Tip:** If you use nvm, nodenv, or other Node.js version managers, your MCP client might not find the correct Node.js binary. In this case, use the full path to your Node.js installation:
+**Tip:** If you use nvm, nodenv, or other Node.js version managers, your MCP client might not find the correct Node.js binary. In this case, use the full path to your Node.js installation:
 
 ```bash
 # Find your Node.js path
@@ -193,7 +193,7 @@ which node
 
 **Note:** Make sure to rebuild (`npm run build`) after making changes to see them reflected in your MCP client.
 
-## 🔧 Token Management
+## Token Management
 
 ### Storage Location
 
@@ -215,7 +215,7 @@ rm -rf ~/.mcp-auth/wpcom-remote-*/
 rm -rf ~/.mcp-auth/wpcom-remote-0.2.1/
 ```
 
-## 🛡️ Security Features
+## Security Features
 
 - **Secure file permissions** (600) on all token files
 - **PKCE verification** for OAuth flows
@@ -223,7 +223,7 @@ rm -rf ~/.mcp-auth/wpcom-remote-0.2.1/
 - **Automatic token validation** before each request
 - **Expired token cleanup** during startup
 
-## 🐛 Troubleshooting
+## Troubleshooting
 
 ### OAuth Issues
 
@@ -258,16 +258,16 @@ If port 3000 is already in use, you'll need to:
 
 **Note:** Simply changing the port without creating a custom OAuth app will cause authentication failures.
 
-## 📋 Requirements
+## Requirements
 
 - **Node.js 22+** (required for fetch API support)
 - **WordPress.com account** (for OAuth authentication)
 
-## 📝 License
+## License
 
 GPL v2 or later
 
-## 🤝 Contributing
+## Contributing
 
 Contributions welcome! This project is maintained by Automattic Inc.
 

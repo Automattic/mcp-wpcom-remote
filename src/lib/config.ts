@@ -27,10 +27,6 @@ export const CONFIG = {
   
   // Authentication Configuration
   JWT_TOKEN: process.env.JWT_TOKEN,
-  WP_API_USERNAME: process.env.WP_API_USERNAME,
-  WP_API_PASSWORD: process.env.WP_API_PASSWORD,
-  WOO_CUSTOMER_KEY: process.env.WOO_CUSTOMER_KEY,
-  WOO_CUSTOMER_SECRET: process.env.WOO_CUSTOMER_SECRET,
   
   // Environment
   NODE_ENV: process.env.NODE_ENV || 'development',
@@ -69,18 +65,6 @@ export const getConfig = () => ({
   
   /** JWT token for authentication */
   jwtToken: CONFIG.JWT_TOKEN,
-  
-  /** WordPress API username for basic auth */
-  wpApiUsername: CONFIG.WP_API_USERNAME,
-  
-  /** WordPress API password for basic auth */
-  wpApiPassword: CONFIG.WP_API_PASSWORD,
-  
-  /** WooCommerce customer key */
-  wooCustomerKey: CONFIG.WOO_CUSTOMER_KEY,
-  
-  /** WooCommerce customer secret */
-  wooCustomerSecret: CONFIG.WOO_CUSTOMER_SECRET,
   
   /** Current environment */
   nodeEnv: CONFIG.NODE_ENV,

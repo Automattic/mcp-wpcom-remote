@@ -28,36 +28,29 @@ let globalEvents: EventEmitter | null = null;
 function validateEnvironment() {
   // Check if we have any form of authentication configured
   const hasJWT = !!CONFIG.JWT_TOKEN;
-  const hasBasicAuth = !!(CONFIG.WP_API_USERNAME && CONFIG.WP_API_PASSWORD);
   const oauthEnabled = CONFIG.OAUTH_ENABLED;
 
   // Detailed logging for authentication configuration
   log('=== Authentication Configuration ===');
   log(`JWT_TOKEN: ${hasJWT ? 'CONFIGURED' : 'NOT SET'}`);
-  log(`Basic Auth (username/password): ${hasBasicAuth ? 'CONFIGURED' : 'NOT SET'}`);
   log(`OAuth enabled: ${oauthEnabled ? 'YES' : 'NO (explicitly disabled)'}`);
   
-  const shouldUseOAuth = oauthEnabled && !hasJWT && !hasBasicAuth;
+  const shouldUseOAuth = oauthEnabled && !hasJWT;
   log(`OAuth will be primary method: ${shouldUseOAuth ? 'YES' : 'NO'}`);
   log('===================================');
 
   // Log authentication method being used
   if (hasJWT) {
     log('Authentication: Using JWT token (highest priority)');
-  } else if (hasBasicAuth && !shouldUseOAuth) {
-    log('Authentication: Using Basic auth (username/password)');
   } else if (shouldUseOAuth) {
     log('Authentication: Using OAuth as primary method');
     log('Authentication: OAuth flow will be triggered if no valid tokens exist');
-  } else if (oauthEnabled) {
-    log('Authentication: OAuth enabled but will fall back to Basic auth if needed');
   }
 
-  if (!hasJWT && !hasBasicAuth && !oauthEnabled) {
+  if (!hasJWT && !oauthEnabled) {
     throw new Error(
       'No authentication method configured. Please set one of:\n' +
         '- JWT_TOKEN for JWT authentication\n' +
-        '- WP_API_USERNAME and WP_API_PASSWORD for Basic auth\n' +
         '- OAuth is enabled by default (set OAUTH_ENABLED=false to disable)'
     );
   }
@@ -65,7 +58,6 @@ function validateEnvironment() {
   // Return authentication method priority
   return {
     hasJWT,
-    hasBasicAuth,
     oauthEnabled,
     shouldUseOAuth
   };
@@ -192,74 +184,17 @@ export async function wpRequest(
       log(`Using OAuth token authentication for general WordPress.com API`);
       log(`Token length: ${oauthTokens.access_token.length}`);
     } else {
-      // OAuth failed and it's the primary method - don't fall back
+      // OAuth failed and it's the primary method - no alternatives
       throw new Error(
         'OAuth authentication failed and no alternative authentication method is configured. ' +
-        'Please complete the OAuth flow or set up alternative authentication (JWT_TOKEN or username/password).'
+        'Please complete the OAuth flow or set up JWT token authentication.'
       );
     }
-  } else if (authConfig.oauthEnabled) {
-    // OAuth is enabled but not primary - try it first, fall back if needed
-    const oauthTokens = await getOAuthTokens();
-    if (oauthTokens) {
-      authHeader = `Bearer ${oauthTokens.access_token}`;
-      log(`Using OAuth token authentication for general WordPress.com API`);
-      log(`Token length: ${oauthTokens.access_token.length}`);
-    } else if (authConfig.hasBasicAuth) {
-      log('OAuth tokens not available, falling back to Basic auth');
-      // Will be set in Basic auth section below
-    } else {
-      throw new Error('OAuth authentication failed and no alternative authentication method is available.');
-    }
-  }
-
-  // Handle Basic auth fallback or when it's the primary method
-  if (!authHeader && authConfig.hasBasicAuth) {
-    // Determine which credentials to use based on the method and args
-    let username: string;
-    let password: string;
-
-    if (
-      params.method === 'tools/call' &&
-      params.args &&
-      params.args.tool &&
-      params.args.tool.startsWith('wc_reports_')
-    ) {
-      // Use WooCommerce credentials for WooCommerce report tools
-      username = CONFIG.WOO_CUSTOMER_KEY!;
-      password = CONFIG.WOO_CUSTOMER_SECRET!;
-
-      // Log which credentials are being used
-      log(`Using WooCommerce credentials for tool: ${params.args.tool}`);
-
-      // Validate WooCommerce credentials
-      if (!username || !password) {
-        throw new Error(
-          'Missing WooCommerce credentials. Please set WOO_CUSTOMER_KEY and WOO_CUSTOMER_SECRET environment variables.'
-        );
-      }
-    } else {
-      // Use standard WordPress credentials for other methods
-      username = CONFIG.WP_API_USERNAME!;
-      password = CONFIG.WP_API_PASSWORD!;
-
-      // Log which credentials are being used
-      log(`Using WordPress credentials for method: ${params.method || 'init'}`);
-    }
-
-    // Log credential information (without exposing the actual values)
-    log(`Username length: ${username ? username.length : 0}`);
-    log(`Password length: ${password ? password.length : 0}`);
-
-    // Prepare Basic auth header
-    const auth = Buffer.from(`${username}:${password}`).toString('base64');
-    authHeader = `Basic ${auth}`;
-    log(`Auth header length: ${auth.length}`);
   }
 
   // Ensure we have an authorization header
   if (!authHeader) {
-    throw new Error('No authentication method available. Please configure authentication.');
+    throw new Error('No authentication method available. Please configure JWT_TOKEN or enable OAuth.');
   }
 
   log(`Environment: ${CONFIG.NODE_ENV}`);

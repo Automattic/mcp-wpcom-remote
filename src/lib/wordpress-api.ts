@@ -31,15 +31,26 @@ function validateEnvironment() {
   const hasBasicAuth = !!(CONFIG.WP_API_USERNAME && CONFIG.WP_API_PASSWORD);
   const oauthEnabled = CONFIG.OAUTH_ENABLED;
 
+  // Detailed logging for authentication configuration
+  log('=== Authentication Configuration ===');
+  log(`JWT_TOKEN: ${hasJWT ? 'CONFIGURED' : 'NOT SET'}`);
+  log(`Basic Auth (username/password): ${hasBasicAuth ? 'CONFIGURED' : 'NOT SET'}`);
+  log(`OAuth enabled: ${oauthEnabled ? 'YES' : 'NO (explicitly disabled)'}`);
+  
+  const shouldUseOAuth = oauthEnabled && !hasJWT && !hasBasicAuth;
+  log(`OAuth will be primary method: ${shouldUseOAuth ? 'YES' : 'NO'}`);
+  log('===================================');
+
   // Log authentication method being used
   if (hasJWT) {
-    log('Authentication: Using JWT token');
-  } else if (hasBasicAuth) {
+    log('Authentication: Using JWT token (highest priority)');
+  } else if (hasBasicAuth && !shouldUseOAuth) {
     log('Authentication: Using Basic auth (username/password)');
+  } else if (shouldUseOAuth) {
+    log('Authentication: Using OAuth as primary method');
+    log('Authentication: OAuth flow will be triggered if no valid tokens exist');
   } else if (oauthEnabled) {
-    log(
-      'Authentication: Using OAuth (default) - will trigger browser authentication if no stored tokens'
-    );
+    log('Authentication: OAuth enabled but will fall back to Basic auth if needed');
   }
 
   if (!hasJWT && !hasBasicAuth && !oauthEnabled) {
@@ -50,6 +61,14 @@ function validateEnvironment() {
         '- OAuth is enabled by default (set OAUTH_ENABLED=false to disable)'
     );
   }
+
+  // Return authentication method priority
+  return {
+    hasJWT,
+    hasBasicAuth,
+    oauthEnabled,
+    shouldUseOAuth
+  };
 }
 
 /**
@@ -76,7 +95,10 @@ async function getOAuthTokens(): Promise<WPComTokens | null> {
       return existingTokens;
     }
 
-    log('OAuth: No existing valid tokens found in persistent storage, initializing auth flow...');
+    log('OAuth: No existing valid tokens found in persistent storage');
+    log('OAuth: This will trigger the OAuth authentication flow');
+    log('OAuth: Your browser should open automatically for authentication');
+    log('OAuth: If the browser does not open, check the logs for a manual URL to open');
 
     // Initialize OAuth provider if needed
     if (!oauthProvider) {
@@ -122,6 +144,15 @@ async function getOAuthTokens(): Promise<WPComTokens | null> {
     log('OAuth: Error getting tokens - Details:', error);
     log('OAuth: Error message:', error instanceof Error ? error.message : 'Unknown error');
     log('OAuth: Error stack:', error instanceof Error ? error.stack : 'No stack trace');
+    
+    // For more specific error handling, we could examine the error type
+    // and decide whether to throw or return null based on the error
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    
+    // Don't silently ignore OAuth errors - they should be reported
+    // but we still return null to allow fallback auth methods to be tried
+    // unless OAuth is the primary authentication method
+    log('OAuth: Authentication failed, but returning null to allow fallback authentication methods');
     return null;
   }
 }
@@ -133,8 +164,8 @@ function removeTrailingSlash(url: string): string {
 export async function wpRequest(
   params: WordPressRequestParams = { method: 'init' }
 ): Promise<WordPressResponse> {
-  // Validate environment variables first
-  validateEnvironment();
+  // Validate environment variables first and get authentication priority
+  const authConfig = validateEnvironment();
 
   const method = 'POST';
   const baseUrl = removeTrailingSlash(CONFIG.WP_API_URL);
@@ -144,20 +175,46 @@ export async function wpRequest(
   log(`Request args: ${JSON.stringify(params.args || {})}`);
 
   // Prepare authorization header
-  let authHeader: string;
+  let authHeader: string = '';
 
-  // Try OAuth first (if enabled and available)
-  const oauthTokens = await getOAuthTokens();
-  if (oauthTokens) {
-    authHeader = `Bearer ${oauthTokens.access_token}`;
-    log(`Using OAuth token authentication for general WordPress.com API`);
-    log(`Token length: ${oauthTokens.access_token.length}`);
-  } else if (CONFIG.JWT_TOKEN) {
-    // Use JWT token for authentication
+  // Determine authentication method based on priority
+  if (authConfig.hasJWT) {
+    // Use JWT token for authentication (highest priority if set)
     authHeader = `Bearer ${CONFIG.JWT_TOKEN}`;
     log(`Using JWT token authentication`);
-    log(`Token length: ${CONFIG.JWT_TOKEN.length}`);
-  } else {
+    log(`Token length: ${CONFIG.JWT_TOKEN!.length}`);
+  } else if (authConfig.shouldUseOAuth) {
+    // OAuth is the primary method when no other auth is configured
+    log('OAuth is the primary authentication method - attempting to get tokens...');
+    const oauthTokens = await getOAuthTokens();
+    if (oauthTokens) {
+      authHeader = `Bearer ${oauthTokens.access_token}`;
+      log(`Using OAuth token authentication for general WordPress.com API`);
+      log(`Token length: ${oauthTokens.access_token.length}`);
+    } else {
+      // OAuth failed and it's the primary method - don't fall back
+      throw new Error(
+        'OAuth authentication failed and no alternative authentication method is configured. ' +
+        'Please complete the OAuth flow or set up alternative authentication (JWT_TOKEN or username/password).'
+      );
+    }
+  } else if (authConfig.oauthEnabled) {
+    // OAuth is enabled but not primary - try it first, fall back if needed
+    const oauthTokens = await getOAuthTokens();
+    if (oauthTokens) {
+      authHeader = `Bearer ${oauthTokens.access_token}`;
+      log(`Using OAuth token authentication for general WordPress.com API`);
+      log(`Token length: ${oauthTokens.access_token.length}`);
+    } else if (authConfig.hasBasicAuth) {
+      log('OAuth tokens not available, falling back to Basic auth');
+      // Will be set in Basic auth section below
+    } else {
+      throw new Error('OAuth authentication failed and no alternative authentication method is available.');
+    }
+  }
+
+  // Handle Basic auth fallback or when it's the primary method
+  if (!authHeader && authConfig.hasBasicAuth) {
     // Determine which credentials to use based on the method and args
     let username: string;
     let password: string;
@@ -198,6 +255,11 @@ export async function wpRequest(
     const auth = Buffer.from(`${username}:${password}`).toString('base64');
     authHeader = `Basic ${auth}`;
     log(`Auth header length: ${auth.length}`);
+  }
+
+  // Ensure we have an authorization header
+  if (!authHeader) {
+    throw new Error('No authentication method available. Please configure authentication.');
   }
 
   log(`Environment: ${CONFIG.NODE_ENV}`);

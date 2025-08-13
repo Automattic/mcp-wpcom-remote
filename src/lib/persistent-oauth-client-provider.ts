@@ -67,6 +67,7 @@ export class PersistentWPComOAuthClientProvider {
     log(`Server URL: ${this.options.serverUrl}`);
     log(`Server hash: ${this.serverUrlHash}`);
     log(`Client ID: ${this.options.clientId}`);
+    log(`OAuth scopes: ${JSON.stringify(this.options.scopes)}`);
   }
 
   /**
@@ -286,15 +287,22 @@ export class PersistentWPComOAuthClientProvider {
    * Build the WordPress.com authorization URL for general API access
    */
   private buildAuthorizationUrl(callbackUrl: string, state: string): string {
+    const scope = this.options.scopes?.join(' ') || 'global';
+    log(`OAuth: Building authorization URL with scope: ${scope}`);
+    log(`OAuth: Options scopes: ${JSON.stringify(this.options.scopes)}`);
+    log(`OAuth: Client ID: ${this.options.clientId || WPCOM_PERSISTENT_CONFIG.clientId}`);
+    
     const params = new URLSearchParams({
       client_id: this.options.clientId || WPCOM_PERSISTENT_CONFIG.clientId,
       redirect_uri: callbackUrl,
       response_type: 'token', // Implicit flow
-      scope: this.options.scopes?.join(' ') || 'global',
+      scope: scope,
       state: state,
     });
 
-    return `${this.options.authorizeEndpoint || WPCOM_PERSISTENT_CONFIG.authorizeEndpoint}?${params.toString()}`;
+    const authUrl = `${this.options.authorizeEndpoint || WPCOM_PERSISTENT_CONFIG.authorizeEndpoint}?${params.toString()}`;
+    log(`OAuth: Authorization URL: ${authUrl}`);
+    return authUrl;
   }
 
   /**

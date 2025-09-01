@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "wordpress.com": {
+      "command": "npx",
+      "args": ["-y", "@automattic/mcp-wpcom-remote@latest"]
+    }
+  }
+}

@@ -1,6 +1,6 @@
 {
   "name": "@automattic/mcp-wpcom-remote",
-  "version": "0.2.12",
+  "version": "0.2.13",
   "description": "MCP WordPress.com remote proxy server",
   "engines": {
     "node": ">=18.0.0"

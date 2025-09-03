@@ -1,5 +1,3 @@
-#!/usr/bin/env node
-
 /**
  * MCP WordPress.com Remote Proxy
  *

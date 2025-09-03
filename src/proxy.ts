@@ -16,10 +16,16 @@ const WPCOM_DEFAULTS = {
   WP_API_URL: 'https://public-api.wordpress.com/wpcom/v2/mcp/v1',
 
   // OAuth configuration optimized for WordPress.com
+  WP_OAUTH_CLIENT_ID: '121755', // Default WordPress.com MCP client ID
   OAUTH_ENABLED: 'true',
+  OAUTH_FLOW_TYPE: 'implicit',
+  OAUTH_SCOPES: 'global',
+  OAUTH_USE_PKCE: 'false',
+  OAUTH_RESOURCE_INDICATOR: 'false',
   OAUTH_CALLBACK_PORT: '3000',
   OAUTH_HOST: '127.0.0.1',
-  WPCOM_CLIENT_ID: '121755', // Default WordPress.com MCP client ID
+  OAUTH_AUTHORIZE_ENDPOINT: 'https://public-api.wordpress.com/oauth2/authorize',
+  OAUTH_TOKEN_ENDPOINT: 'https://public-api.wordpress.com/oauth2/token',
 
   // WordPress.com specific config directory
   WPCOM_MCP_CONFIG_DIR:
@@ -47,9 +53,11 @@ function setupWordPressComEnvironment(): void {
     logger.info('Using JWT token authentication', 'WPCOM-PROXY');
   } else if (process.env.OAUTH_ENABLED === 'true') {
     logger.info(
-      `Using OAuth authentication (client ID: ${process.env.WPCOM_CLIENT_ID})`,
+      `Using OAuth authentication (client ID: ${process.env.WP_OAUTH_CLIENT_ID})`,
       'WPCOM-PROXY'
     );
+    logger.info(`OAuth flow type: ${process.env.OAUTH_FLOW_TYPE}`, 'WPCOM-PROXY');
+    logger.info(`OAuth scopes: ${process.env.OAUTH_SCOPES}`, 'WPCOM-PROXY');
   }
 }
 

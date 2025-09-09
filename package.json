@@ -1,6 +1,6 @@
 {
   "name": "@automattic/mcp-wpcom-remote",
-  "version": "0.2.15",
+  "version": "0.2.16",
   "description": "MCP WordPress.com remote proxy server",
   "engines": {
     "node": ">=18.0.0"
@@ -39,7 +39,7 @@
     "deps:check": "npm outdated"
   },
   "dependencies": {
-    "@automattic/mcp-wordpress-remote": "^0.2.13"
+    "@automattic/mcp-wordpress-remote": "^0.2.16"
   },
   "devDependencies": {
     "@types/node": "^18.19.0",

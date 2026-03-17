@@ -1,6 +1,6 @@
 {
   "name": "@automattic/mcp-wpcom-remote",
-  "version": "0.2.18",
+  "version": "0.2.19",
   "description": "MCP WordPress.com remote proxy server",
   "engines": {
     "node": ">=18.0.0"
@@ -39,7 +39,11 @@
     "deps:check": "npm outdated"
   },
   "dependencies": {
-    "@automattic/mcp-wordpress-remote": "^0.2.21"
+    "@automattic/mcp-wordpress-remote": "^0.2.21",
+    "socks-proxy-agent": "^8.0.5",
+    "https-proxy-agent": "^7.0.6",
+    "pac-resolver": "^7.0.1",
+    "@tootallnate/quickjs-emscripten": "^0.23.0"
   },
   "devDependencies": {
     "@types/node": "^18.19.0",
@@ -59,7 +63,11 @@
     "outDir": "dist",
     "splitting": false,
     "external": [
-      "node:*"
+      "node:*",
+      "socks-proxy-agent",
+      "https-proxy-agent",
+      "pac-resolver",
+      "@tootallnate/quickjs-emscripten"
     ],
     "noExternal": [
       "@automattic/mcp-wordpress-remote"

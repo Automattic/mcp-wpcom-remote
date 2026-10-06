@@ -25,6 +25,8 @@ const WPCOM_DEFAULTS = {
   OAUTH_HOST: '127.0.0.1',
   OAUTH_AUTHORIZE_ENDPOINT: 'https://public-api.wordpress.com/oauth2/authorize',
   OAUTH_TOKEN_ENDPOINT: 'https://public-api.wordpress.com/oauth2/token',
+  // Allow 5 minutes to finish the browser login (upstream defaults to 30 seconds)
+  OAUTH_TIMEOUT_MS: '300000',
 
   // WordPress.com specific config directory
   WPCOM_MCP_CONFIG_DIR:

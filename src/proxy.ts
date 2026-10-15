@@ -14,17 +14,13 @@ const WPCOM_DEFAULTS = {
   // WordPress.com public API endpoint
   WP_API_URL: 'https://public-api.wordpress.com/wpcom/v2/mcp/v1',
 
-  // OAuth configuration optimized for WordPress.com
-  WP_OAUTH_CLIENT_ID: '121755', // Default WordPress.com MCP client ID
+  // OAuth 2.1 (authorization code + PKCE, dynamic client registration and
+  // resource indicators) is the upstream default. WordPress.com advertises its
+  // endpoints through discovery, so no client ID or endpoint overrides are set.
   OAUTH_ENABLED: 'true',
-  OAUTH_FLOW_TYPE: 'implicit',
   OAUTH_SCOPES: 'global',
-  OAUTH_USE_PKCE: 'false',
-  OAUTH_RESOURCE_INDICATOR: 'false',
   OAUTH_CALLBACK_PORT: '3000',
   OAUTH_HOST: '127.0.0.1',
-  OAUTH_AUTHORIZE_ENDPOINT: 'https://public-api.wordpress.com/oauth2/authorize',
-  OAUTH_TOKEN_ENDPOINT: 'https://public-api.wordpress.com/oauth2/token',
   // Allow 5 minutes to finish the browser login (upstream defaults to 30 seconds)
   OAUTH_TIMEOUT_MS: '300000',
 
@@ -54,15 +50,12 @@ function setupWordPressComEnvironment(): void {
     logger.info('Using JWT token authentication', 'WPCOM-PROXY');
   } else if (process.env.OAUTH_ENABLED === 'true') {
     logger.info(
-      `Using OAuth authentication (client ID: ${process.env.WP_OAUTH_CLIENT_ID})`,
+      `Using OAuth 2.1 authentication (client ID: ${process.env.WP_OAUTH_CLIENT_ID || 'dynamic registration'})`,
       'WPCOM-PROXY'
     );
-    logger.info(`OAuth flow type: ${process.env.OAUTH_FLOW_TYPE}`, 'WPCOM-PROXY');
     logger.info(`OAuth scopes: ${process.env.OAUTH_SCOPES}`, 'WPCOM-PROXY');
   }
 }
-
-
 
 /**
  * Main execution function

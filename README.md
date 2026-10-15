@@ -48,7 +48,7 @@ That's it! No additional configuration needed for WordPress.com.
 This package automatically configures:
 
 - **API Endpoint**: `https://public-api.wordpress.com/wpcom/v2/mcp/v1`
-- **OAuth Client ID**: `121755` (WordPress.com MCP client)
+- **OAuth**: OAuth 2.1 authorization code with PKCE; the client is registered dynamically on first login
 - **OAuth Enabled**: `true` by default
 - **Callback Port**: `3000`
 - **Config Directory**: `~/.mcp-auth/wpcom-remote-{version}/`
@@ -118,7 +118,7 @@ If you need to use a different WordPress.com endpoint:
 | `OAUTH_ENABLED`        | `true`                                             | Enable OAuth authentication   |
 | `OAUTH_CALLBACK_PORT`  | `3000`                                             | OAuth callback port           |
 | `OAUTH_HOST`           | `127.0.0.1`                                        | OAuth callback hostname       |
-| `WPCOM_CLIENT_ID`      | `121755`                                           | WordPress.com OAuth client ID |
+| `WP_OAUTH_CLIENT_ID`   | _(dynamic registration)_                           | Custom OAuth 2.1 client ID    |
 | `WPCOM_MCP_CONFIG_DIR` | `~/.mcp-auth`                                      | Config directory override     |
 | `JWT_TOKEN`            | _(none)_                                           | JWT token for authentication  |
 | `LOG_FILE`             | _(none)_                                           | Log file path                 |

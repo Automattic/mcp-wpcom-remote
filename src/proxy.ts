@@ -19,7 +19,6 @@ const WPCOM_DEFAULTS = {
   // endpoints through discovery, so no client ID or endpoint overrides are set.
   OAUTH_ENABLED: 'true',
   OAUTH_SCOPES: 'global',
-  OAUTH_CALLBACK_PORT: '3000',
   OAUTH_HOST: '127.0.0.1',
   // Allow 5 minutes to finish the browser login (upstream defaults to 30 seconds)
   OAUTH_TIMEOUT_MS: '300000',
@@ -44,7 +43,7 @@ function setupWordPressComEnvironment(): void {
   // Log the configuration being used
   logger.info(`Using WordPress.com API: ${process.env.WP_API_URL}`, 'WPCOM-PROXY');
   logger.info(`OAuth enabled: ${process.env.OAUTH_ENABLED}`, 'WPCOM-PROXY');
-  logger.info(`Callback port: ${process.env.OAUTH_CALLBACK_PORT}`, 'WPCOM-PROXY');
+  logger.info(`Callback port: ${process.env.OAUTH_CALLBACK_PORT || 'automatic'}`, 'WPCOM-PROXY');
 
   if (process.env.JWT_TOKEN) {
     logger.info('Using JWT token authentication', 'WPCOM-PROXY');

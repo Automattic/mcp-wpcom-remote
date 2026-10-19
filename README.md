@@ -50,8 +50,8 @@ This package automatically configures:
 - **API Endpoint**: `https://public-api.wordpress.com/wpcom/v2/mcp/v1`
 - **OAuth**: OAuth 2.1 authorization code with PKCE; the client is registered dynamically on first login
 - **OAuth Enabled**: `true` by default
-- **Callback Port**: `3000`
-- **Config Directory**: `~/.mcp-auth/wpcom-remote-{version}/`
+- **Callback Port**: selected automatically unless `OAUTH_CALLBACK_PORT` is set
+- **Config Directory**: `~/.mcp-auth/wordpress-remote-{upstream version}/`, for example `~/.mcp-auth/wordpress-remote-0.5.2/`
 
 ## Advanced Configuration
 
@@ -174,7 +174,7 @@ Configure your MCP client to use the local version:
 **Authorization fails:**
 
 - Verify WordPress.com account permissions
-- Try clearing tokens: `rm -rf ~/.mcp-auth/wpcom-remote-*/`
+- Try clearing tokens: `rm -rf ~/.mcp-auth/wordpress-remote-*/`
 
 ### Port Conflicts
 

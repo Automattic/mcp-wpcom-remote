@@ -112,16 +112,16 @@ If you need to use a different WordPress.com endpoint:
 
 ## Environment Variables
 
-| Variable               | Default                                            | Description                   |
-| ---------------------- | -------------------------------------------------- | ----------------------------- |
-| `WP_API_URL`           | `https://public-api.wordpress.com/wpcom/v2/mcp/v1` | WordPress.com API endpoint    |
-| `OAUTH_ENABLED`        | `true`                                             | Enable OAuth authentication   |
-| `OAUTH_CALLBACK_PORT`  | `3000`                                             | OAuth callback port           |
-| `OAUTH_HOST`           | `127.0.0.1`                                        | OAuth callback hostname       |
-| `WP_OAUTH_CLIENT_ID`   | _(dynamic registration)_                           | Custom OAuth 2.1 client ID    |
-| `WPCOM_MCP_CONFIG_DIR` | `~/.mcp-auth`                                      | Config directory override     |
-| `JWT_TOKEN`            | _(none)_                                           | JWT token for authentication  |
-| `LOG_FILE`             | _(none)_                                           | Log file path                 |
+| Variable               | Default                                            | Description                  |
+| ---------------------- | -------------------------------------------------- | ---------------------------- |
+| `WP_API_URL`           | `https://public-api.wordpress.com/wpcom/v2/mcp/v1` | WordPress.com API endpoint   |
+| `OAUTH_ENABLED`        | `true`                                             | Enable OAuth authentication  |
+| `OAUTH_CALLBACK_PORT`  | _(automatic)_                                      | OAuth callback port          |
+| `OAUTH_HOST`           | `127.0.0.1`                                        | OAuth callback hostname      |
+| `WP_OAUTH_CLIENT_ID`   | _(dynamic registration)_                           | Custom OAuth 2.1 client ID   |
+| `WPCOM_MCP_CONFIG_DIR` | `~/.mcp-auth`                                      | Config directory override    |
+| `JWT_TOKEN`            | _(none)_                                           | JWT token for authentication |
+| `LOG_FILE`             | _(none)_                                           | Log file path                |
 
 ## Development Mode
 
@@ -168,8 +168,8 @@ Configure your MCP client to use the local version:
 
 **Browser doesn't open:**
 
-- Check if port 3000 is available
-- Try a different port with `OAUTH_CALLBACK_PORT`
+- The callback port is selected automatically unless `OAUTH_CALLBACK_PORT` is set.
+- If you set `OAUTH_CALLBACK_PORT`, check that the configured port is available.
 
 **Authorization fails:**
 
@@ -178,7 +178,7 @@ Configure your MCP client to use the local version:
 
 ### Port Conflicts
 
-If port 3000 is already in use:
+Leave `OAUTH_CALLBACK_PORT` unset to let the proxy select a callback port. To use a fixed port explicitly:
 
 ```json
 {

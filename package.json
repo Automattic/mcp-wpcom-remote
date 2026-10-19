@@ -28,6 +28,7 @@
     "@automattic/mcp-wpcom-remote": "dist/proxy.js"
   },
   "scripts": {
+    "test": "node --test tests/*.test.mjs",
     "build": "tsup",
     "build:watch": "tsup --watch",
     "check": "prettier --check . && tsc",

@@ -1,6 +1,6 @@
 {
   "name": "@automattic/mcp-wpcom-remote",
-  "version": "0.5.3",
+  "version": "0.5.4",
   "description": "MCP WordPress.com remote proxy server",
   "engines": {
     "node": ">=18.0.0"
@@ -28,7 +28,7 @@
     "@automattic/mcp-wpcom-remote": "dist/proxy.js"
   },
   "scripts": {
-    "test": "node --test tests/*.test.mjs",
+    "test": "npm run build && node --test tests/*.test.mjs",
     "build": "tsup",
     "build:watch": "tsup --watch",
     "check": "prettier --check . && tsc",
@@ -40,11 +40,11 @@
     "deps:check": "npm outdated"
   },
   "dependencies": {
-    "@automattic/mcp-wordpress-remote": "^0.5.2",
-    "socks-proxy-agent": "^8.0.5",
+    "@automattic/mcp-wordpress-remote": "^0.5.3",
+    "@tootallnate/quickjs-emscripten": "^0.23.0",
     "https-proxy-agent": "^7.0.6",
     "pac-resolver": "^7.0.1",
-    "@tootallnate/quickjs-emscripten": "^0.23.0"
+    "socks-proxy-agent": "^8.0.5"
   },
   "devDependencies": {
     "@types/node": "^18.19.0",
@@ -76,6 +76,9 @@
     "minify": false,
     "sourcemap": false,
     "target": "node18",
-    "platform": "node"
+    "platform": "node",
+    "banner": {
+      "js": "import { createRequire as createWpcomRequire } from 'node:module'; const require = createWpcomRequire(import.meta.url);"
+    }
   }
 }

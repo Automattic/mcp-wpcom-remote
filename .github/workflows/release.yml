@@ -39,8 +39,8 @@ jobs:
       - name: Type-check
         run: npx tsc --noEmit
 
-      - name: Build
-        run: npm run build
+      - name: Build and test
+        run: npm test
 
       - name: Publish (canary dist-tag on prerelease, latest on stable)
         # Use npm@latest via npx because Node 22 bundles npm 10, but Trusted
